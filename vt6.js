@@ -64,9 +64,10 @@ const LisaaJoukkue = function(props) {
       const [jasenetstate, setJasenetstate] = React.useState([]);
       const [jaseninputList, setjaseninputList] = React.useState(["Jäsen 1", "Jäsen 2"])
       const [jasenCounter, setjasenCounter] = React.useState(2)
+      const [leimausstate, setLeimausstate] = React.useState([])
       let [formistate, setFormistate] = React.useState({
         nimi : "",
-        leimaustapa : [],
+        leimaustapa : leimausstate,
         sarja : "radio",
         jasenet: jasenetstate,
         key: Date.now()
@@ -86,6 +87,7 @@ const LisaaJoukkue = function(props) {
     let validity = obj.validity;
     let newstate = {...formistate}; 
     console.log(kentta, arvo)
+    console.log(newstate)
     
     
     if (  kentta == "nimi") {
@@ -97,6 +99,7 @@ const LisaaJoukkue = function(props) {
           setFormistate(newstate);
          return;
      }
+    
      else {
          obj.setCustomValidity("");
  
@@ -109,44 +112,16 @@ const LisaaJoukkue = function(props) {
 
 
     
-    if ( type == "checkbox" ) {
-      newstate[kentta] = formistate[kentta].slice(0); // tehdään kopio, koska alkuperäistä ei voi suoraan käyttää. Huom. tämä slice-temppu ei riitä, jos taulukossa on objekteja. Ei siis tee "deep" kloonia
-      if ( checked ) {
-          // lisätään
-          newstate[kentta].push(arvo);
-      }
-      else {
-          // poistetaan
-          newstate[kentta].slice(newstate[kentta].indexOf(arvo),1); 
-      }
-      // tarkistetaan vielä, että varmasti ainakin yksi checkbox oli valittuna. Jos ei niin asetetaan virhe
-      // miten hoidetaan virheilmoitusten nollaus kaikista checkboxeista?
-      // virheilmoitus asettuu nyt siihen, joka on viimeksi tyhjätty, mutta jos 
-      // valitaan joku muista niin miten päästään edelliseen käsiksi?
-      if ( newstate[kentta].length == 0 ) {
-          obj.setCustomValidity("Valitse vähintään yksi");
-          // ratkaisu useamman checkboxin virheilmoituksen nollaamiseen on tallentaa aina talteen ne checkboxit
-          // joille on asetettu virheilmoitus. Sama voitaisiin hoitaa refseillä, mutta
-          // tämä versio on yksinkertaisempi
-          checkboxes.push( obj );
-      }
-      else {
-          obj.setCustomValidity("");
-          // tässä pitää tyhjentää virheilmoitus _kaikista_ checkboxeista
-          // valituksi tullut checkbox ei välttämättä ole seuraavassa joukossa
-          for( let checkbox of checkboxes) {
-              checkbox.setCustomValidity("");
-          }
-          // palautetaan taulukko tyhjäksi
-          checkboxes = [];
-
-      }
-
+  
+  if (validity.valueMissing) {
+    obj.setCustomValidity("Täytä kenttä!!!")
   }
 
  else {
-
+  console.log(kentta)
+  console.log(newstate[kentta])
           newstate[kentta] = arvo;
+        
 
   }
  setFormistate(newstate);
@@ -154,13 +129,30 @@ const LisaaJoukkue = function(props) {
 
 }
 
+// Leimaus checkboxien muutosta käsittelevä
+const handleLeimausChange = (e) => {
+  console.log(e.target)
+  if (e.target.checked) {
+    console.log("VALITTU")
+    setLeimausstate([...leimausstate, e.target.value])
+    console.log(leimausstate)
+  }
+
+ 
+}
+
 const handleJasenChange = (e) => {
+  
+  console.log(e.target.value)
+ 
   setJasenetstate({...jasenetstate, [e.target.name]: e.target.value})
 
   console.log(jasenetstate);
   
   
   formistate["jasenet"] = jasenetstate;
+  console.log(jasenetstate);
+  console.log(formistate)
 console.log(jasenCounter)
   if (Object.keys(jasenetstate).length >= jasenCounter && jasenCounter < 5) {
     console.log("Nyt pitää lisätä");
@@ -173,9 +165,21 @@ console.log(jasenCounter)
     setjaseninputList([...jaseninputList, `Jäsen ${pituus}`])
   }
 
+
+
   console.log(Object.keys(jasenetstate).length)
-  
+  console.log(Object.values(jasenetstate).length)
+
+ let jaseninput = document.getElementsByClassName("jasenet")[0]
+ 
+  if(Object.values(jasenetstate).length < 2) {
+    jaseninput.setCustomValidity("Lisää vähintään yksi jäsen")
+  } else {
+    jaseninput.setCustomValidity("")
+  }
   console.log(formistate);
+
+  
 }
 
 // Tää uusiks!
@@ -200,11 +204,11 @@ console.log(jasenCounter)
     let uusijoukkue = {};
     let kentat = ["nimi","leimaustapa","sarja","jasenet"];
     let virhe = 0;
+   
     for ( let i of kentat) {
       
       
-
-        if ( formistate["nimi"] == "" || formistate["leimaustapa"] == "" || formistate["sarja"] == ""  || formistate["jasenet"] == "" ) {
+        if ( formistate["nimi"] == ""  || formistate["sarja"] == ""  || formistate["jasenet"] == "" ) {
             // tänne ei pitäisi päästä
             console.log(i, "virhe");
             virhe++;
@@ -219,9 +223,9 @@ console.log(jasenCounter)
        
         
         
-        console.log(formistate["leimaustapa"])
+        console.log(leimausstate)
         let arr = [];
-        for (let i of formistate["leimaustapa"]) {
+        for (let i of leimausstate) {
           console.log(i)
          arr.push(leimObj[i])
         }
@@ -243,7 +247,7 @@ console.log(jasenCounter)
     setJasenetstate([])
     let newstate = {
       nimi : "",
-      leimaustapa : [],
+      leimaustapa : leimausstate,
       sarja : "radio",
       jasenet: jasenetstate,
       key: Date.now()
@@ -262,14 +266,17 @@ console.log(jasenCounter)
     return (  
     <div>
     <form method="post" onSubmit={handleInsert}>
-    <fieldset key={formistate.key}>
+    <fieldset  key={formistate.key}>
     <legend>Lisää joukkue</legend>
     <label key="nimi">Nimi <input required="required" onChange={handleChange} type="text" name="nimi"  value={formistate.nimi} /></label>
     {console.log(props.sarjat)} 
-    {props.leimaustavat.map(item => <label key={item + "l"} >
-      {item} <input onChange={handleChange} 
+
+    {props.leimaustavat.map(item => 
+    <label key={item + "l"} >
+      {item} <input onChange={handleLeimausChange} 
     key={item} value={item}  type="checkbox" 
-    checked={formistate.leimaustapa.includes(item)} name="leimaustapa" id={item} /></label>)}
+    checked={leimausstate.includes(item)} name="leimaustapa" id={item} /></label>)}
+
     {Object.keys(props.sarjat).map((item, i)=> 
     <label key={i+"sarja"} >{props.sarjat[item].nimi} 
     <input onChange={handleChange}key={props.sarjat[item].nimi} type="radio" value={props.sarjat[item].nimi}name="sarja" 
