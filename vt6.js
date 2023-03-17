@@ -320,6 +320,7 @@ const ListaaJoukkueet = function(props) {
           <tr>
             <th>Sarja</th>
             <th>Joukkue</th>
+            <th>Jäsenet</th>
           </tr>
         
           {Object.keys(sortedArr).map((i) =>
@@ -340,12 +341,24 @@ const YksittainenJoukkue = function(props) {
       <td>{props.joukkue.nimi.trim()}</td>
       <td>
         <ul>
-          {Object.keys(props.joukkue.jasenet).map((j, index) => 
-          <li key={index + "_" + props.joukkue.jasenet[j]}>{props.joukkue.jasenet[j]}</li>)}
+          <JasenListaus jasenet={props.joukkue.jasenet}/>
         </ul>
       </td>
     </tr>
   )
+}
+
+const JasenListaus = function(props) {
+  return (
+<ul>
+{Object.keys(props.jasenet).map((j, index) => 
+   
+   <li key={index + "_" + props.jasenet[j]}>{props.jasenet[j]}</li>
+   
+   )}
+</ul>
+  )
+  
 }
 
 
