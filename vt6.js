@@ -61,7 +61,7 @@ const LisaaJoukkue = function(props) {
 
       console.log(sarjaObj)
 
-      const [jasenetstate, setJasenetstate] = React.useState([]);
+     
       const [jaseninputList, setjaseninputList] = React.useState(["Jäsen 1", "Jäsen 2"])
       const [jasenCounter, setjasenCounter] = React.useState(2)
       const [leimausstate, setLeimausstate] = React.useState([])
@@ -71,14 +71,14 @@ const LisaaJoukkue = function(props) {
         nimi : "",
         leimaustapa : [],
         sarja : "radio",
-        jasenet: [],
+        jasenet: ["", ""],
         key: Date.now()
     });    
     let checkboxes = []; // checkboxien virheilmoitusten nollaamista varten tarvitaan taulukko
     let jaseninputit = [];
    
     
-    const handleChange = function(event) {
+    const handleChange = function(event, index) {
     let obj = event.target;
     let luokka = obj.className;
     let arvo = obj.value;
@@ -143,17 +143,20 @@ const LisaaJoukkue = function(props) {
       }
 
   }  else if (  kentta == "nimi") {
+    console.log("NIMI")
       for (let j of props.kopio) {
         if (j.nimi.trim().toLowerCase() == arvo.trim().toLowerCase()){
           obj.setCustomValidity("Ei samannimisiä");
           obj.reportValidity();
-          newstate[kentta] = arvo;
-          setFormistate(newstate);
+        
+          
          return;
      }
     
      else {
          obj.setCustomValidity("");
+         newstate[kentta] = arvo;
+        
  
      }
       }
@@ -161,7 +164,62 @@ const LisaaJoukkue = function(props) {
       
     } else if (validity.valueMissing) {
     obj.setCustomValidity("Täytä kenttä!!!")
+  } else if (luokka == "jasenet"){
+    console.log(index)
+    newstate["jasenet"] = formistate["jasenet"].slice(0)
+    console.log(formistate["jasenet"])
+    console.log(newstate["jasenet"].length)
+    if (index > newstate["jasenet"].length) {
+      let uusi = [...newstate["jasenet"]]
+     uusi.push(arvo)
+     newstate["jasenet"] = uusi
+    } else {
+      newstate["jasenet"][index] = arvo
+    }
+   
+ 
+
+
+  console.log(newstate["jasenet"])
+  console.log(newstate)
+
+
+  console.log(formistate)
+console.log(jasenCounter)
+  if (newstate["jasenet"].length >= jasenCounter && jasenCounter < 5 && newstate["jasenet"].includes("") == false) {
+    console.log("Nyt pitää lisätä", newstate["jasenet"].length);
+    let pituus = newstate["jasenet"].length +1
+    console.log(pituus)
+    let counter = jasenCounter +1
+    setjasenCounter(counter)
+    console.log(jasenCounter)
+    let uusistate = [...newstate["jasenet"], ""]
+    newstate["jasenet"] = uusistate
+   
+
+    setjaseninputList([...jaseninputList, `Jäsen ${pituus}`])
+  }
+
+
+
+
+
+ let jaseninput = document.getElementsByClassName("jasenet")[0]
+ 
+  if(newstate["jasenet"].length < 2) {
+    jaseninput.setCustomValidity("Lisää vähintään yksi jäsen")
   } else {
+    jaseninput.setCustomValidity("")
+  }
+  
+
+
+
+
+  // =======
+
+  }
+  else {
   console.log(kentta)
   console.log(newstate[kentta])
           newstate[kentta] = arvo;
@@ -175,48 +233,8 @@ const LisaaJoukkue = function(props) {
 
 
 
-const handleJasenChange = (e) => {
+const handleJasenChange = (e, index) => {
   
-  console.log(e.target.value)
- 
-  setJasenetstate({...jasenetstate, [e.target.name]: e.target.value})
-
-  console.log(jasenetstate);
-  let newstate = {...formistate}
-  
-  
-  newstate["jasenet"] = jasenetstate;
-  console.log(jasenetstate);
-  console.log(formistate)
-console.log(jasenCounter)
-  if (Object.keys(jasenetstate).length >= jasenCounter && jasenCounter < 5) {
-    console.log("Nyt pitää lisätä");
-    let pituus = Object.keys(jasenetstate).length +1
-    console.log(pituus)
-    let counter = jasenCounter +1
-    setjasenCounter(counter)
-    console.log(jasenCounter)
-
-    setjaseninputList([...jaseninputList, `Jäsen ${pituus}`])
-  }
-
-
-
-  console.log(Object.keys(jasenetstate).length)
-  console.log(Object.values(jasenetstate).length)
-
- let jaseninput = document.getElementsByClassName("jasenet")[0]
- 
-  if(Object.values(jasenetstate).length < 2) {
-    jaseninput.setCustomValidity("Lisää vähintään yksi jäsen")
-  } else {
-    jaseninput.setCustomValidity("")
-  }
-  
-
-  setFormistate(newstate)
-  console.log(formistate);
-
   
 }
 
@@ -261,15 +279,15 @@ console.log(jasenCounter)
        
         
         
-        console.log(leimausstate)
+        console.log(formistate["leimaustapa"])
         let arr = [];
-        for (let i of leimausstate) {
+        for (let i of formistate["leimaustapa"]) {
           console.log(i)
          arr.push(leimObj[i])
         }
         console.log(formistate["jasenet"]);
        
-        uusijoukkue["jasenet"] = Object.values(formistate["jasenet"])
+        uusijoukkue["jasenet"] = formistate["jasenet"].filter(j => j)
         uusijoukkue["rastileimaukset"] = ""
        uusijoukkue["leimaustapa"] = arr
         console.log(uusijoukkue);
@@ -282,16 +300,17 @@ console.log(jasenCounter)
     }
     
    
-    setJasenetstate([])
+  
     let newstate = {
       nimi : "",
       leimaustapa : [],
       sarja : "radio",
-      jasenet: jasenetstate,
+      jasenet: ["", ""],
       key: Date.now()
     }
 
     setFormistate(newstate);
+    setjaseninputList(["Jäsen 1", "Jäsen 2"])
 
     props.handleInsert(uusijoukkue);
     event.target.reset();
@@ -325,9 +344,9 @@ console.log(jasenCounter)
       <fieldset>
     <legend>Jäsenet </legend>
     {
-      jaseninputList.map(item => 
+      jaseninputList.map((item, index) => 
 
-        <label key={item}>{item} <input onChange={handleJasenChange} type="text" name ={item}className="jasenet"/></label>
+        <label key={item}>{item} <input onChange={event => handleChange(event, index)} type="text" name ={item}className="jasenet" value={formistate.jasenet[index]}/></label>
         )
           
             
