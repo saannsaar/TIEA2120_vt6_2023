@@ -65,18 +65,19 @@ const LisaaJoukkue = function(props) {
       const [jaseninputList, setjaseninputList] = React.useState(["Jäsen 1", "Jäsen 2"])
       const [jasenCounter, setjasenCounter] = React.useState(2)
       const [leimausstate, setLeimausstate] = React.useState([])
+      const [checkstate, setCheckstate] = React.useState([]);
+
       let [formistate, setFormistate] = React.useState({
         nimi : "",
-        leimaustapa : leimausstate,
+        leimaustapa : [],
         sarja : "radio",
-        jasenet: jasenetstate,
+        jasenet: [],
         key: Date.now()
     });    
     let checkboxes = []; // checkboxien virheilmoitusten nollaamista varten tarvitaan taulukko
     let jaseninputit = [];
    
-    const [checkstate, setCheckstate] = React.useState([]);
-
+    
     const handleChange = function(event) {
     let obj = event.target;
     let luokka = obj.className;
@@ -89,8 +90,59 @@ const LisaaJoukkue = function(props) {
     console.log(kentta, arvo)
     console.log(newstate)
     
-    
-    if (  kentta == "nimi") {
+    if ( type == "checkbox" ) {
+      console.log(Array.isArray(newstate[kentta]))
+      console.log(newstate[kentta])
+      console.log(formistate[kentta])
+      console.log(formistate[kentta].slice())
+      newstate[kentta] = formistate[kentta].slice(0)
+      // tehdään kopio, koska alkuperäistä ei voi suoraan käyttää. Huom. tämä slice-temppu ei riitä, jos taulukossa on objekteja. Ei siis tee "deep" kloonia
+      console.log(newstate[kentta])
+      console.log(Array.isArray(newstate[kentta]))
+      console.log(Array.isArray(formistate[kentta]))
+     
+     
+      if ( checked ) {
+          // lisätään
+       
+          
+        
+          newstate[kentta] = [...newstate[kentta], arvo]
+          console.log(newstate[kentta])
+          console.log(newstate)
+         
+      }
+      else {
+          // poistetaan
+         newstate.splice(newstate.indexOf(arvo),1) 
+        
+         
+      }
+     
+      // tarkistetaan vielä, että varmasti ainakin yksi checkbox oli valittuna. Jos ei niin asetetaan virhe
+      // miten hoidetaan virheilmoitusten nollaus kaikista checkboxeista?
+      // virheilmoitus asettuu nyt siihen, joka on viimeksi tyhjätty, mutta jos 
+      // valitaan joku muista niin miten päästään edelliseen käsiksi?
+      if ( newstate[kentta].length == 0 ) {
+          obj.setCustomValidity("Valitse vähintään yksi");
+          // ratkaisu useamman checkboxin virheilmoituksen nollaamiseen on tallentaa aina talteen ne checkboxit
+          // joille on asetettu virheilmoitus. Sama voitaisiin hoitaa refseillä, mutta
+          // tämä versio on yksinkertaisempi
+          checkboxes.push( obj );
+      }
+      else {
+          obj.setCustomValidity("");
+          // tässä pitää tyhjentää virheilmoitus _kaikista_ checkboxeista
+          // valituksi tullut checkbox ei välttämättä ole seuraavassa joukossa
+          for( let checkbox of checkboxes) {
+              checkbox.setCustomValidity("");
+          }
+          // palautetaan taulukko tyhjäksi
+          checkboxes = [];
+
+      }
+
+  }  else if (  kentta == "nimi") {
       for (let j of props.kopio) {
         if (j.nimi.trim().toLowerCase() == arvo.trim().toLowerCase()){
           obj.setCustomValidity("Ei samannimisiä");
@@ -107,17 +159,9 @@ const LisaaJoukkue = function(props) {
       }
 
       
-    }
-   
-
-
-    
-  
-  if (validity.valueMissing) {
+    } else if (validity.valueMissing) {
     obj.setCustomValidity("Täytä kenttä!!!")
-  }
-
- else {
+  } else {
   console.log(kentta)
   console.log(newstate[kentta])
           newstate[kentta] = arvo;
@@ -129,17 +173,7 @@ const LisaaJoukkue = function(props) {
 
 }
 
-// Leimaus checkboxien muutosta käsittelevä
-const handleLeimausChange = (e) => {
-  console.log(e.target)
-  if (e.target.checked) {
-    console.log("VALITTU")
-    setLeimausstate([...leimausstate, e.target.value])
-    console.log(leimausstate)
-  }
 
- 
-}
 
 const handleJasenChange = (e) => {
   
@@ -148,9 +182,10 @@ const handleJasenChange = (e) => {
   setJasenetstate({...jasenetstate, [e.target.name]: e.target.value})
 
   console.log(jasenetstate);
+  let newstate = {...formistate}
   
   
-  formistate["jasenet"] = jasenetstate;
+  newstate["jasenet"] = jasenetstate;
   console.log(jasenetstate);
   console.log(formistate)
 console.log(jasenCounter)
@@ -177,6 +212,9 @@ console.log(jasenCounter)
   } else {
     jaseninput.setCustomValidity("")
   }
+  
+
+  setFormistate(newstate)
   console.log(formistate);
 
   
@@ -247,7 +285,7 @@ console.log(jasenCounter)
     setJasenetstate([])
     let newstate = {
       nimi : "",
-      leimaustapa : leimausstate,
+      leimaustapa : [],
       sarja : "radio",
       jasenet: jasenetstate,
       key: Date.now()
@@ -266,16 +304,16 @@ console.log(jasenCounter)
     return (  
     <div>
     <form method="post" onSubmit={handleInsert}>
-    <fieldset  key={formistate.key}>
+    <fieldset  key={formistate.key} onChange={handleChange}>
     <legend>Lisää joukkue</legend>
     <label key="nimi">Nimi <input required="required" onChange={handleChange} type="text" name="nimi"  value={formistate.nimi} /></label>
     {console.log(props.sarjat)} 
 
     {props.leimaustavat.map(item => 
     <label key={item + "l"} >
-      {item} <input onChange={handleLeimausChange} 
+      {item} <input onChange={handleChange} 
     key={item} value={item}  type="checkbox" 
-    checked={leimausstate.includes(item)} name="leimaustapa" id={item} /></label>)}
+    checked={formistate.leimaustapa.includes(item)} name="leimaustapa" id={item} /></label>)}
 
     {Object.keys(props.sarjat).map((item, i)=> 
     <label key={i+"sarja"} >{props.sarjat[item].nimi} 
