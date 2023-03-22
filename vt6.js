@@ -17,6 +17,14 @@ const App = function(props) {
         console.log(state.kilpailu.sarjat); 
         console.log(Array.from(state.kilpailu));
 
+        const sortedRastit = [...state.kilpailu.rastit].sort((a,b) => a.koodi.localeCompare(b.koodi))
+        console.log(sortedRastit)
+        let listausRastit = sortedRastit.map((ele, i) => {
+          return {...ele, naytaInput: false}
+        })
+        const [rastikopiostate, setRastikopioState] = React.useState(listausRastit)
+      
+        console.log(rastikopiostate)
         const handleInsert = function(uusijoukkue) {
           let kisa = state.kilpailu;
           let joukkueet = Array.from(kisa.joukkueet);
@@ -29,14 +37,28 @@ const App = function(props) {
           console.log(kopiostate);
 
         }
+
+        const handleDoubleClick = function(listausrastit) {
+          let list = [...listausrastit]
+          setRastikopioState(listausrastit)
+        }
+        const handleBlur = function(listausrastit) {
+          let list = [...listausrastit]
+          setRastikopioState(listausrastit)
+        }
       /* jshint ignore:start */
-      return (<div id="container1"><div className="part">
-        <LisaaJoukkue handleInsert={handleInsert} kopio={kopiostate} setkopio={setKopioState} kilpailu={state.kilpailu}leimaustavat={state.kilpailu.leimaustavat} sarjat={state.kilpailu.sarjat}/>
+      return (<div><div id="container1">
+        <div className="part">
+                <LisaaJoukkue handleInsert={handleInsert} kopio={kopiostate} setkopio={setKopioState} kilpailu={state.kilpailu}leimaustavat={state.kilpailu.leimaustavat} sarjat={state.kilpailu.sarjat}/>
         </div>
         <div className="part">
-        <ListaaJoukkueet joukkueet={kopiostate}/>
-        
-              </div>
+                <ListaaJoukkueet joukkueet={kopiostate}/>
+        </div>
+        </div>
+
+        <div id="rastilistadiv">
+              <Rastilistaus rastit={rastikopiostate} handleBlur={handleBlur}handleDoubleClick={handleDoubleClick}/>
+        </div>
               </div>);
       /* jshint ignore:end */
 };
@@ -451,6 +473,109 @@ const JasenListaus = function(props) {
   
 }
 
+const Rastilistaus = function(props) {
+
+  console.log(props.rastit)
+
+  
+
+ const [muutettava, setMuutettava] = React.useState({
+  koodi: ""
+ })
+
+
+  const handleChange = function(e) {
+    console.log("MUUTETAAn")
+    console.log(e.target)
+    console.log(muutettava)
+    let newstate = [...muutettava]
+    if (isNaN(e.target.value.charAt(0))) {
+      console.log("KIRJAIN")
+
+      e.target.setCustomValidity("Rasti pitää alkaa numerolla")
+      e.target.reportValidity()
+      newstate["koodi"] = e.target.value
+      setMuutettava(newstate)
+      return
+    } else {
+      e.target.setCustomValidity("")
+      newstate["koodi"] = e.target.value
+     
+    }
+    setMuutettava(newstate)
+  }
+
+
+  const handleDoubleClick = function(e) {
+    console.log("DOUBLE CLICK")
+    console.log(e.target.textContent)
+    let uus = props.rastit.map(elem => {
+     
+      if (elem.koodi.trim().toLowerCase() == e.target.textContent.trim().toLowerCase()) {
+        console.log(elem)
+        setMuutettava({koodi: elem.koodi})
+       return {...elem, naytaInput: true}
+       
+      } else {
+        return elem
+      }
+      
+    })
+
+  
+    props.handleDoubleClick(uus)
+  }
+  const handleBlur = function(e) {
+    console.log("blur")
+    console.log(e.target)
+    console.log(muutettava)
+    
+
+    let uus = props.rastit.map(elem => {
+     
+      if (elem.koodi.trim().toLowerCase() == e.target.value.trim().toLowerCase()) {
+        console.log(elem)
+
+       return {...elem, naytaInput: false}
+       
+      } else {
+        return elem
+      }
+      
+    })
+props.handleBlur(uus)
+  }
+
+  return (
+   
+    <ul>
+      {
+      props.rastit.map((rasti, index) => 
+      <Elementti value={rasti.koodi}
+      handleChange={handleChange}
+      handleDoubleClick={handleDoubleClick}
+      handleBlur={handleBlur}
+      muutettava={muutettava["koodi"]}
+      naytaInput={rasti.naytaInput}/>)}
+    </ul>
+  )
+
+}
+
+const Elementti = function(props) {
+  
+  return (
+    <li>
+      {
+        props.naytaInput ? (
+          <input  type="text" value={props.muutettava} onChange={props.handleChange} onBlur={props.handleBlur} autoFocus/>
+        ) : (
+          <p onDoubleClick={props.handleDoubleClick} > {props.value}</p>
+        )
+      }
+    </li>
+  )
+}
 
 
 const root = ReactDOM.createRoot( document.getElementById('root'));

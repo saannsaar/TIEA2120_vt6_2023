@@ -37,9 +37,19 @@ body {
   td {
     border: 2px solid rgb(248, 143, 218);
     box-shadow: 2px 2px 5px rgb(165, 127, 155);
-    border-spacing: 10px;
+    
   }
 
   table {
     border-collapse: separate;
+    border-spacing: 4px;
+  }
+
+  td > ul {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+
+  #rastilistadiv {
+    width: fit-content;
   }
