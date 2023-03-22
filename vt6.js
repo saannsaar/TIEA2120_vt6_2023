@@ -509,9 +509,13 @@ const Rastilistaus = function(props) {
   const handleDoubleClick = function(e) {
     console.log("DOUBLE CLICK")
     console.log(e.target.textContent)
+    let teksti = e.target.textContent.trim()
+    let indeksi = teksti.indexOf(" ");
+    let tarvittavaosa = teksti.slice(0, indeksi).trim()
+    console.log(tarvittavaosa)
     let uus = props.rastit.map(elem => {
      
-      if (elem.koodi.trim().toLowerCase() == e.target.textContent.trim().toLowerCase()) {
+      if (elem.koodi.trim().toLowerCase() == tarvittavaosa.toLowerCase()) {
         console.log(elem)
         setMuutettava({koodi: elem.koodi})
        return {...elem, naytaInput: true}
@@ -524,6 +528,7 @@ const Rastilistaus = function(props) {
 
   
     props.handleDoubleClick(uus)
+    
   }
   const handleBlur = function(e) {
     console.log("blur")
@@ -533,17 +538,21 @@ const Rastilistaus = function(props) {
 
     let uus = props.rastit.map(elem => {
      
-      if (elem.koodi.trim().toLowerCase() == e.target.value.trim().toLowerCase()) {
+      if (elem.id == e.target.getAttribute("id")) {
         console.log(elem)
 
-       return {...elem, naytaInput: false}
+       return {...elem, koodi: muutettava["koodi"] , naytaInput: false}
        
       } else {
         return elem
       }
       
     })
+    console.log(uus)
+   
 props.handleBlur(uus)
+let newstate = {koodi: ""}
+setMuutettava(newstate)
   }
 
   return (
@@ -555,6 +564,9 @@ props.handleBlur(uus)
       handleChange={handleChange}
       handleDoubleClick={handleDoubleClick}
       handleBlur={handleBlur}
+      id={rasti.id}
+      lat={rasti.lat}
+      lon={rasti.lon}
       muutettava={muutettava["koodi"]}
       naytaInput={rasti.naytaInput}/>)}
     </ul>
@@ -568,9 +580,9 @@ const Elementti = function(props) {
     <li>
       {
         props.naytaInput ? (
-          <input  type="text" value={props.muutettava} onChange={props.handleChange} onBlur={props.handleBlur} autoFocus/>
+          <p><input id={props.id} type="text" value={props.muutettava} onChange={props.handleChange} onBlur={props.handleBlur} autoFocus/> ( {props.lat} {props.lon} )</p>
         ) : (
-          <p onDoubleClick={props.handleDoubleClick} > {props.value}</p>
+          <p onDoubleClick={props.handleDoubleClick} > {props.value} ( {props.lat} {props.lon}) </p>
         )
       }
     </li>
