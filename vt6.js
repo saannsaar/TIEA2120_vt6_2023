@@ -66,16 +66,19 @@ const LisaaJoukkue = function(props) {
       const [jasenCounter, setjasenCounter] = React.useState(2)
       const [leimausstate, setLeimausstate] = React.useState([])
       const [checkstate, setCheckstate] = React.useState([]);
+      console.log(props.leimaustavat[0])
+      console.log(props.sarjat[0].nimi)
 
       let [formistate, setFormistate] = React.useState({
         nimi : "",
-        leimaustapa : [],
-        sarja : "radio",
+        leimaustapa : [props.leimaustavat[0]],
+        sarja : props.sarjat[0].nimi,
         jasenet: ["", ""],
         key: Date.now()
     });    
     let checkboxes = []; // checkboxien virheilmoitusten nollaamista varten tarvitaan taulukko
     let jaseninputit = [];
+
    
     
     const handleChange = function(event, index) {
@@ -114,7 +117,7 @@ const LisaaJoukkue = function(props) {
       }
       else {
           // poistetaan
-         newstate.splice(newstate.indexOf(arvo),1) 
+         newstate[kentta].splice(newstate[kentta].indexOf(arvo),1) 
         
          
       }
@@ -148,23 +151,31 @@ const LisaaJoukkue = function(props) {
         if (j.nimi.trim().toLowerCase() == arvo.trim().toLowerCase()){
           obj.setCustomValidity("Ei samannimisiä");
           obj.reportValidity();
+          newstate[kentta] = arvo;
+      setFormistate(newstate);
         
           
          return;
      }
     
-     else {
+     else if (arvo.length == 0) {
+      obj.setCustomValidity("Lisää nimi")
+      obj.reportValidity();
+      newstate[kentta] = arvo;
+      setFormistate(newstate);
+      return;
+     }else {
          obj.setCustomValidity("");
          newstate[kentta] = arvo;
         
- 
      }
       }
 
       
-    } else if (validity.valueMissing) {
+    } else if (arvo.length == 0) {
     obj.setCustomValidity("Täytä kenttä!!!")
   } else if (luokka == "jasenet"){
+    
     console.log(index)
     newstate["jasenet"] = formistate["jasenet"].slice(0)
     console.log(formistate["jasenet"])
@@ -177,7 +188,8 @@ const LisaaJoukkue = function(props) {
       newstate["jasenet"][index] = arvo
     }
    
- 
+    
+  
 
 
   console.log(newstate["jasenet"])
@@ -198,21 +210,34 @@ console.log(jasenCounter)
    
 
     setjaseninputList([...jaseninputList, `Jäsen ${pituus}`])
+
+    
   }
 
-
-
-
-
- let jaseninput = document.getElementsByClassName("jasenet")[0]
- 
-  if(newstate["jasenet"].length < 2) {
-    jaseninput.setCustomValidity("Lisää vähintään yksi jäsen")
-  } else {
-    jaseninput.setCustomValidity("")
-  }
   
 
+
+ 
+  
+  let apuarr = []
+  for (let j of newstate["jasenet"]) {
+    if (j != "") {
+      console.log(j)
+      apuarr.push(j)
+    }
+  }
+
+  if (apuarr.length <2) {
+    obj.setCustomValidity("Vähintään 2 jäsentä pitää lisätä! :)")
+    jaseninputit.push( obj );
+  } else {
+    obj.setCustomValidity("")
+    for (let i of jaseninputit) {
+      i.setCustomValidity("")
+    }
+
+  }
+  jaseninputit = []
 
 
 
@@ -233,10 +258,7 @@ console.log(jasenCounter)
 
 
 
-const handleJasenChange = (e, index) => {
-  
-  
-}
+
 
 // Tää uusiks!
   const generateId = () => {
@@ -251,7 +273,11 @@ const handleJasenChange = (e, index) => {
    }
     return maxid +1;
   }
+  
   const handleInsert = function(event) {
+   
+   
+
     event.preventDefault();
     let obj = event.target;
     let luokka = obj.className;
