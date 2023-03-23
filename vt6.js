@@ -1,67 +1,88 @@
 "use strict";
+
+
+
+
+
+
+
+
+
 /* globals ReactDOM: false */
 /* globals React: false */
 /* globals data: false */
-const App = function(props) {
-        // Käytetään lähes samaa dataa kuin viikkotehtävässä 1
-        // Alustetaan tämän komponentin tilaksi data.
-        // Tee tehtävässä vaaditut lisäykset ja muutokset tämän komponentin tilaan
-        // päivitettäessä React-komponentin tilaa on aina vanha tila kopioitava uudeksi
-        // kopioimista varten on annettu valmis mallifunktio kopioi_kilpailu
-        // huom. kaikissa tilanteissa ei kannata kopioida koko dataa
-        const [state, setState] = React.useState({"kilpailu": kopioi_kilpailu(data) });
-        console.log( state.kilpailu );
-        const [kopiostate, setKopioState] = React.useState(state.kilpailu.joukkueet);
-        console.log( state.kilpailu );
-        console.log(kopiostate)
-        console.log(state.kilpailu.sarjat); 
-        console.log(Array.from(state.kilpailu));
+function App(props) {
+  // Käytetään lähes samaa dataa kuin viikkotehtävässä 1
+  // Alustetaan tämän komponentin tilaksi data.
+  // Tee tehtävässä vaaditut lisäykset ja muutokset tämän komponentin tilaan
+  // päivitettäessä React-komponentin tilaa on aina vanha tila kopioitava uudeksi
+  // kopioimista varten on annettu valmis mallifunktio kopioi_kilpailu
+  // huom. kaikissa tilanteissa ei kannata kopioida koko dataa
+  const [state, setState] = React.useState({ "kilpailu": kopioi_kilpailu(data) });
+  console.log(state.kilpailu);
+  const [kopiostate, setKopioState] = React.useState(state.kilpailu.joukkueet);
+  console.log(state.kilpailu);
+  console.log(kopiostate);
+  console.log(state.kilpailu.sarjat);
+  console.log(Array.from(state.kilpailu));
 
-        const sortedRastit = [...state.kilpailu.rastit].sort((a,b) => a.koodi.localeCompare(b.koodi))
-        console.log(sortedRastit)
-        let listausRastit = sortedRastit.map((ele, i) => {
-          return {...ele, naytaInput: false}
-        })
-        const [rastikopiostate, setRastikopioState] = React.useState(listausRastit)
-      
-        console.log(rastikopiostate)
-        const handleInsert = function(uusijoukkue) {
-          let kisa = state.kilpailu;
-          let joukkueet = Array.from(kisa.joukkueet);
-          //Lisätään uudele joukkueelle key-arvo
-          uusijoukkue.key = state.kilpailu.joukkueet.length+1;
-          joukkueet.push(uusijoukkue);
-          
-          console.log(state);
-          setKopioState([...kopiostate, uusijoukkue]);
-          console.log(kopiostate);
+  const sortedRastit = [...state.kilpailu.rastit].sort((a, b) => a.koodi.localeCompare(b.koodi));
+  console.log(sortedRastit);
+  let listausRastit = sortedRastit.map((ele, i) => {
+    return { ...ele, naytaInput: false, naytaKartta: false };
+  });
+  const [rastikopiostate, setRastikopioState] = React.useState(listausRastit);
 
-        }
+  console.log(rastikopiostate);
+  const handleInsert = function (uusijoukkue) {
+    let kisa = state.kilpailu;
+    let joukkueet = Array.from(kisa.joukkueet);
+    //Lisätään uudele joukkueelle key-arvo
+    uusijoukkue.key = state.kilpailu.joukkueet.length + 1;
+    joukkueet.push(uusijoukkue);
 
-        const handleDoubleClick = function(listausrastit) {
-          let list = [...listausrastit]
-          setRastikopioState(listausrastit)
-        }
-        const handleBlur = function(listausrastit) {
-          let list = [...listausrastit]
-          setRastikopioState(listausrastit)
-        }
-      /* jshint ignore:start */
-      return (<div><div id="container1">
-        <div className="part">
-                <LisaaJoukkue handleInsert={handleInsert} kopio={kopiostate} setkopio={setKopioState} kilpailu={state.kilpailu}leimaustavat={state.kilpailu.leimaustavat} sarjat={state.kilpailu.sarjat}/>
-        </div>
-        <div className="part">
-                <ListaaJoukkueet joukkueet={kopiostate}/>
-        </div>
-        </div>
+    console.log(state);
+    setKopioState([...kopiostate, uusijoukkue]);
+    console.log(kopiostate);
 
-        <div id="rastilistadiv">
-              <Rastilistaus rastit={rastikopiostate} handleBlur={handleBlur}handleDoubleClick={handleDoubleClick}/>
-        </div>
-              </div>);
-      /* jshint ignore:end */
-};
+  };
+
+  const handleDoubleClick = function (listausrastit) {
+    let list = [...listausrastit];
+    setRastikopioState(listausrastit);
+  };
+  const handleBlur = function (listausrastit) {
+    let list = [...listausrastit];
+    setRastikopioState(listausrastit);
+  };
+  const handleClickmap = function (listausrastit) {
+    console.log(listausrastit);
+
+    //TÄSSÄ JOKU MÄTTÄÄ????
+    setRastikopioState([...listausrastit]);
+    console.log(rastikopiostate);
+  };
+  /* jshint ignore:start */
+  return (<div><div id="container1">
+    <div className="part">
+      <LisaaJoukkue handleInsert={handleInsert} kopio={kopiostate} setkopio={setKopioState} kilpailu={state.kilpailu} leimaustavat={state.kilpailu.leimaustavat} sarjat={state.kilpailu.sarjat} />
+    </div>
+    <div className="part">
+      <ListaaJoukkueet joukkueet={kopiostate} />
+    </div>
+  </div>
+    <div id="container2">
+      <div id="rastilistadiv">
+        <Rastilistaus rastit={rastikopiostate} handleClickmap={handleClickmap} handleBlur={handleBlur} handleDoubleClick={handleDoubleClick} />
+      </div>
+      <div id="map">
+     <KarttaComp rastit={rastikopiostate}/>
+       
+      </div>
+    </div>
+  </div>);
+  /* jshint ignore:end */
+}
 
 const LisaaJoukkue = function(props) {
       
@@ -515,7 +536,7 @@ const Rastilistaus = function(props) {
     console.log(tarvittavaosa)
     let uus = props.rastit.map(elem => {
      
-      if (elem.koodi.trim().toLowerCase() == tarvittavaosa.toLowerCase()) {
+      if (elem.koodi.trim().toLowerCase() == teksti.toLowerCase()) {
         console.log(elem)
         setMuutettava({koodi: elem.koodi})
        return {...elem, naytaInput: true}
@@ -529,6 +550,23 @@ const Rastilistaus = function(props) {
   
     props.handleDoubleClick(uus)
     
+  }
+  const handleClickmap = function(e) {
+    console.log("Nyt lisätään map")
+     console.log(e.target)
+     let uus = props.rastit.map(elem => {
+     
+      if (elem.id == e.target.getAttribute("id")) {
+        console.log(elem)
+       
+       return {...elem, naytaKartta: true}
+       
+      } else {
+        return elem
+      }})
+      console.log(uus)
+
+      props.handleClickmap(uus)
   }
   const handleBlur = function(e) {
     console.log("blur")
@@ -556,7 +594,7 @@ setMuutettava(newstate)
   }
 
   return (
-   
+    <div>
     <ul>
       {
       props.rastit.map((rasti, index) => 
@@ -564,12 +602,15 @@ setMuutettava(newstate)
       handleChange={handleChange}
       handleDoubleClick={handleDoubleClick}
       handleBlur={handleBlur}
+      handleClickmap={handleClickmap}
       id={rasti.id}
       lat={rasti.lat}
       lon={rasti.lon}
       muutettava={muutettava["koodi"]}
       naytaInput={rasti.naytaInput}/>)}
     </ul>
+   
+    </div>
   )
 
 }
@@ -582,13 +623,70 @@ const Elementti = function(props) {
         props.naytaInput ? (
           <p><input id={props.id} type="text" value={props.muutettava} onChange={props.handleChange} onBlur={props.handleBlur} autoFocus/> ( {props.lat} {props.lon} )</p>
         ) : (
-          <p onDoubleClick={props.handleDoubleClick} > {props.value} ( {props.lat} {props.lon}) </p>
+          <div><p onDoubleClick={props.handleDoubleClick} > {props.value} </p><p id={props.id}onClick={props.handleClickmap}> ( {props.lat} {props.lon}) </p></div>
+         
+         
         )
       }
     </li>
   )
 }
 
+
+
+const KarttaComp = function(props) {
+// define the ref here
+console.log(props)
+for (let r of props.rastit) {
+  if (r.naytaKartta == true) {
+    console.log(r)
+let sijainti = [parseFloat(r.lat), parseFloat(r.lon)]
+console.log(sijainti)
+
+const mapRef = React.useRef(null);
+const [latLng, setLatLng] = React.useState(["20.00", "21.00"])
+
+
+React.useEffect(() => {
+  mapRef.current = L.map('map', {
+      center: latLng,
+      crs: L.TileLayer.MML.get3067Proj(),
+      zoom: 11,
+      layers: [
+        L.tileLayer.mml_wmts({ layer: "maastokartta", key : "8c118a1f-99c2-4e8a-8849-54dc255f3205" })
+      ]
+  })
+}, [])
+  
+const layerRef = React.useRef(null)
+React.useEffect(() => {
+    layerRef.current = L.layerGroup().addTo(mapRef.current)
+}, [])
+
+React.useEffect(
+  () => {
+   
+    L.marker(sijainti).addTo(layerRef.current);
+      
+  },
+  []
+)
+
+// pass it in the required div node
+return (
+  <div ref={mapRef} id="map" className="p-2">
+   
+  </div>
+);
+  } else {
+    return (
+      <div></div>
+    )
+  }
+}
+
+
+}
 
 const root = ReactDOM.createRoot( document.getElementById('root'));
 root.render(

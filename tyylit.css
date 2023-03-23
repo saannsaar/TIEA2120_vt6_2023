@@ -53,3 +53,16 @@ body {
   #rastilistadiv {
     width: fit-content;
   }
+
+  #container2 {
+    display: flex;
+    flex-direction: row;
+  }
+  .leaflet-container {
+    width: 200px;
+    height: 200px;
+  }
+
+  #map {
+    margin-left: 40px;
+  }
