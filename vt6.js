@@ -8,6 +8,7 @@
 
 
 
+
 /* globals ReactDOM: false */
 /* globals React: false */
 /* globals data: false */
@@ -21,6 +22,7 @@ function App(props) {
   const [state, setState] = React.useState({ "kilpailu": kopioi_kilpailu(data) });
   console.log(state.kilpailu);
   const [kopiostate, setKopioState] = React.useState(state.kilpailu.joukkueet);
+  const [showmapState, setshowmapState] = React.useState(false)
   console.log(state.kilpailu);
   console.log(kopiostate);
   console.log(state.kilpailu.sarjat);
@@ -55,13 +57,18 @@ function App(props) {
     let list = [...listausrastit];
     setRastikopioState(listausrastit);
   };
-  const handleClickmap = function (listausrastit) {
+  const handleClickmap = function (listausrastit, showmap) {
     console.log(listausrastit);
 
     //TÄSSÄ JOKU MÄTTÄÄ????
-    setRastikopioState([...listausrastit]);
-    console.log(rastikopiostate);
+    setRastikopioState(listausrastit);
+   
+
+
+    
+
   };
+ 
   /* jshint ignore:start */
   return (<div><div id="container1">
     <div className="part">
@@ -75,10 +82,12 @@ function App(props) {
       <div id="rastilistadiv">
         <Rastilistaus rastit={rastikopiostate} handleClickmap={handleClickmap} handleBlur={handleBlur} handleDoubleClick={handleDoubleClick} />
       </div>
-      <div id="map">
-     <KarttaComp rastit={rastikopiostate}/>
-       
+      <div id="mappi">
+    
+    
       </div>
+      
+      
     </div>
   </div>);
   /* jshint ignore:end */
@@ -496,6 +505,52 @@ const JasenListaus = function(props) {
 
 const Rastilistaus = function(props) {
 
+
+
+  console.log(props.showmapState)
+
+  
+  const [mapInstance, setMapInstance] = React.useState(null);
+  const [marker, setMarker] = React.useState(null);
+
+  const mapRef = React.useRef(null);
+  const tileRef = React.useRef(null);
+  const markerRef = React.useRef(null);
+
+
+  tileRef.current = L.tileLayer.mml_wmts({ layer: "maastokartta", key : "8c118a1f-99c2-4e8a-8849-54dc255f3205" })
+
+  const [mapStyles, setMapStules] = React.useState({ visibility: 'hidden'})
+
+  const mapParams = {
+    center: [62.148123, 25.647515], 
+    crs: L.TileLayer.MML.get3067Proj(),
+    zoom: 8,
+    zoomControl: false,
+    layers: [tileRef.current], 
+  };
+  React.useEffect(() => {
+    mapRef.current = L.map('mapp', mapParams);
+    // Add an event listener:
+    mapRef.current.on('click', () => {
+      console.log('map clicked');
+    });
+    // Set map instance to state:
+    setMapInstance(mapRef.current);
+  }, []);
+
+  React.useEffect(() => {
+    // Check for the map instance before adding something (ie: another event listener).
+    // If no map, return:
+    if (!mapInstance) return;
+    if (mapInstance) {
+      mapInstance.on('zoomstart', () => {
+        console.log('Zooming!!!');
+      });
+    }
+  }, [mapInstance]);
+
+ 
   console.log(props.rastit)
 
   
@@ -532,6 +587,7 @@ const Rastilistaus = function(props) {
     console.log(e.target.textContent)
     let teksti = e.target.textContent.trim()
     let indeksi = teksti.indexOf(" ");
+    
     let tarvittavaosa = teksti.slice(0, indeksi).trim()
     console.log(tarvittavaosa)
     let uus = props.rastit.map(elem => {
@@ -554,26 +610,58 @@ const Rastilistaus = function(props) {
   const handleClickmap = function(e) {
     console.log("Nyt lisätään map")
      console.log(e.target)
+    
+     console.log(e.target.offsetTop)
+     let sijainti = e.target.offsetTop.toString().concat("px")
+    
+     let naytettava;
+
      let uus = props.rastit.map(elem => {
      
       if (elem.id == e.target.getAttribute("id")) {
         console.log(elem)
-       
+        naytettava = [elem.lat, elem.lon]
        return {...elem, naytaKartta: true}
        
       } else {
-        return elem
+        return {...elem, naytaKartta: false}
       }})
-      console.log(uus)
+      console.log(naytettava)
+
+      if (marker) {
+        marker.removeFrom(mapInstance);
+        markerRef.current = null;
+        setMapStules({visibility: "hidden"})
+     
+        
+      } else {
+        setMapStules({visibility: ""})
+     
+        markerRef.current = L.marker(naytettava).addTo(mapInstance);
+        mapInstance.setView(naytettava, 8)
+        console.log(document.getElementById("mapp"))
+        document.getElementById("mapp").style.top = sijainti
+      }
+      setMarker(markerRef.current);
 
       props.handleClickmap(uus)
   }
+
+  const handleMapBlur = function(e) {
+    console.log("Pois mäppi")
+    console.log(e.target)
+  }
+
+  // Rastin muokkaus inputista poistumista käsittelevä funktio
+  // jossa muokattavan rastin "naytaInput" muutetaan "false", jotta osataan
+  // muuttaa se taas pelkäksi tekstiksi input laatikon sijaan
   const handleBlur = function(e) {
     console.log("blur")
     console.log(e.target)
     console.log(muutettava)
     
-
+    // etsitään rasteista muokattavissa oleva rasti, jotta ostaan vaihtaa
+    // oikeaan elementtiin naytaInput arvo
     let uus = props.rastit.map(elem => {
      
       if (elem.id == e.target.getAttribute("id")) {
@@ -595,6 +683,7 @@ setMuutettava(newstate)
 
   return (
     <div>
+    <div>
     <ul>
       {
       props.rastit.map((rasti, index) => 
@@ -603,27 +692,39 @@ setMuutettava(newstate)
       handleDoubleClick={handleDoubleClick}
       handleBlur={handleBlur}
       handleClickmap={handleClickmap}
+      handleMapBlur={handleMapBlur}
       id={rasti.id}
       lat={rasti.lat}
       lon={rasti.lon}
       muutettava={muutettava["koodi"]}
       naytaInput={rasti.naytaInput}/>)}
     </ul>
+
    
     </div>
+    
+    <div>
+       
+    <div id="mapp" style={mapStyles} />
+
+</div>
+</div>
   )
 
 }
 
+// Oma komponentti yksittäisen li elementin luomiselle
 const Elementti = function(props) {
   
   return (
-    <li>
+    <li key={props.id}>
       {
+        // Jos propsina annetun joukkueen "naytaInput" arvo on "true", näytetään text-input laatikkona johon
+        //rastin nimi on lisätty arvoksi, jos "naytaInput" arvo on "false", näytetään normaalina tekstielementtinä
         props.naytaInput ? (
           <p><input id={props.id} type="text" value={props.muutettava} onChange={props.handleChange} onBlur={props.handleBlur} autoFocus/> ( {props.lat} {props.lon} )</p>
         ) : (
-          <div><p onDoubleClick={props.handleDoubleClick} > {props.value} </p><p id={props.id}onClick={props.handleClickmap}> ( {props.lat} {props.lon}) </p></div>
+          <div><p onDoubleClick={props.handleDoubleClick} > {props.value} </p><p id={props.id}onClick={props.handleClickmap} onBlur={props.handleMapBlur}> ( {props.lat} {props.lon}) </p></div>
          
          
         )
@@ -633,60 +734,6 @@ const Elementti = function(props) {
 }
 
 
-
-const KarttaComp = function(props) {
-// define the ref here
-console.log(props)
-for (let r of props.rastit) {
-  if (r.naytaKartta == true) {
-    console.log(r)
-let sijainti = [parseFloat(r.lat), parseFloat(r.lon)]
-console.log(sijainti)
-
-const mapRef = React.useRef(null);
-const [latLng, setLatLng] = React.useState(["20.00", "21.00"])
-
-
-React.useEffect(() => {
-  mapRef.current = L.map('map', {
-      center: latLng,
-      crs: L.TileLayer.MML.get3067Proj(),
-      zoom: 11,
-      layers: [
-        L.tileLayer.mml_wmts({ layer: "maastokartta", key : "8c118a1f-99c2-4e8a-8849-54dc255f3205" })
-      ]
-  })
-}, [])
-  
-const layerRef = React.useRef(null)
-React.useEffect(() => {
-    layerRef.current = L.layerGroup().addTo(mapRef.current)
-}, [])
-
-React.useEffect(
-  () => {
-   
-    L.marker(sijainti).addTo(layerRef.current);
-      
-  },
-  []
-)
-
-// pass it in the required div node
-return (
-  <div ref={mapRef} id="map" className="p-2">
-   
-  </div>
-);
-  } else {
-    return (
-      <div></div>
-    )
-  }
-}
-
-
-}
 
 const root = ReactDOM.createRoot( document.getElementById('root'));
 root.render(

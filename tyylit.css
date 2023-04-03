@@ -52,17 +52,20 @@ body {
 
   #rastilistadiv {
     width: fit-content;
+    position: relative;
   }
 
-  #container2 {
+  #container2 > div > div {
     display: flex;
     flex-direction: row;
   }
   .leaflet-container {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
   }
 
-  #map {
+  #mapp {
     margin-left: 40px;
+    position: relative;
+  
   }
