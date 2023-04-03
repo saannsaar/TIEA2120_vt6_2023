@@ -637,7 +637,7 @@ const Rastilistaus = function(props) {
       } else {
         setMapStules({visibility: ""})
      
-        markerRef.current = L.marker(naytettava, {draggable: true }).addTo(mapInstance);
+        markerRef.current = L.marker(naytettava, {draggable: true, id: e.target.id}).addTo(mapInstance);
         markerRef.current.on("dragstart", function(e) {
           console.log("DRAG ALKO")
         })
@@ -646,9 +646,17 @@ const Rastilistaus = function(props) {
         })
         markerRef.current.on("dragend", function(e) {
           console.log("DRAG loppu")
-          console.log(e.target.getLatLng())
-          console.log(e.target)
-
+          console.log(e.target.getLatLng().lat)
+          console.log(e.target.options.id)
+          let uus = props.rastit.map(elem => {
+            if (elem.id == e.target.options.id) {
+              return {...elem, lat: e.target.getLatLng().lat, lon: e.target.getLatLng().lng}
+            } else {
+              return {...elem}
+            }
+            
+          })
+          props.handleClickmap(uus)
         })
         mapInstance.setView(naytettava, 8)
         console.log(document.getElementById("mapp"))
