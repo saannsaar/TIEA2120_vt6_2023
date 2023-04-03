@@ -637,7 +637,19 @@ const Rastilistaus = function(props) {
       } else {
         setMapStules({visibility: ""})
      
-        markerRef.current = L.marker(naytettava).addTo(mapInstance);
+        markerRef.current = L.marker(naytettava, {draggable: true }).addTo(mapInstance);
+        markerRef.current.on("dragstart", function(e) {
+          console.log("DRAG ALKO")
+        })
+        markerRef.current.on("dragover", function(e) {
+          console.log("DRAG dragover")
+        })
+        markerRef.current.on("dragend", function(e) {
+          console.log("DRAG loppu")
+          console.log(e.target.getLatLng())
+          console.log(e.target)
+
+        })
         mapInstance.setView(naytettava, 8)
         console.log(document.getElementById("mapp"))
         document.getElementById("mapp").style.top = sijainti
@@ -646,7 +658,7 @@ const Rastilistaus = function(props) {
 
       props.handleClickmap(uus)
   }
-
+ 
   const handleMapBlur = function(e) {
     console.log("Pois mäppi")
     console.log(e.target)
