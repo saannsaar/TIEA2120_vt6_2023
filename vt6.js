@@ -14,7 +14,7 @@ function App(props) {
   // console.log(state.kilpailu);
   const [kopiostate, setKopioState] = React.useState(state.kilpailu.joukkueet);
   const [showmapState, setshowmapState] = React.useState(false)
-  //  console.log(state.kilpailu);
+   console.log(state.kilpailu);
   // console.log(kopiostate);
   // console.log(state.kilpailu.sarjat);
   // console.log(Array.from(state.kilpailu));
@@ -134,12 +134,9 @@ const LisaaJoukkue = React.memo(function(props) {
     // console.log(newstate)
     
     if ( type == "checkbox" ) {
-      // console.log(Array.isArray(newstate[kentta]))
-      // console.log(newstate[kentta])
-      // console.log(formistate[kentta])
-      // console.log(formistate[kentta].slice())
+     
       newstate[kentta] = formistate[kentta].slice(0)
-      // tehdään kopio, koska alkuperäistä ei voi suoraan käyttää. Huom. tämä slice-temppu ei riitä, jos taulukossa on objekteja. Ei siis tee "deep" kloonia
+    
       // console.log(newstate[kentta])
       // console.log(Array.isArray(newstate[kentta]))
       // console.log(Array.isArray(formistate[kentta]))
@@ -147,9 +144,6 @@ const LisaaJoukkue = React.memo(function(props) {
      
       if ( checked ) {
           // lisätään
-       
-          
-        
           newstate[kentta] = [...newstate[kentta], arvo]
           // console.log(newstate[kentta])
           //console.log(newstate)
@@ -158,25 +152,18 @@ const LisaaJoukkue = React.memo(function(props) {
       else {
           // poistetaan
          newstate[kentta].splice(newstate[kentta].indexOf(arvo),1) 
-        
-         
+
       }
      
-      // tarkistetaan vielä, että varmasti ainakin yksi checkbox oli valittuna. Jos ei niin asetetaan virhe
-      // miten hoidetaan virheilmoitusten nollaus kaikista checkboxeista?
-      // virheilmoitus asettuu nyt siihen, joka on viimeksi tyhjätty, mutta jos 
-      // valitaan joku muista niin miten päästään edelliseen käsiksi?
+      // tarkistetaan että yksi checkbox on valittuna, jos ei niin virheilmoitus
       if ( newstate[kentta].length == 0 ) {
           obj.setCustomValidity("Valitse vähintään yksi");
-          // ratkaisu useamman checkboxin virheilmoituksen nollaamiseen on tallentaa aina talteen ne checkboxit
-          // joille on asetettu virheilmoitus. Sama voitaisiin hoitaa refseillä, mutta
-          // tämä versio on yksinkertaisempi
+         
           checkboxes.push( obj );
       }
       else {
           obj.setCustomValidity("");
-          // tässä pitää tyhjentää virheilmoitus _kaikista_ checkboxeista
-          // valituksi tullut checkbox ei välttämättä ole seuraavassa joukossa
+          // tyhjennetään virheilmoitus kaikista checkboxeista
           for( let checkbox of checkboxes) {
               checkbox.setCustomValidity("");
           }
@@ -186,7 +173,7 @@ const LisaaJoukkue = React.memo(function(props) {
       }
 
   }  else if (  kentta == "nimi") {
-    // console.log("NIMI")
+    // tsekataan ettei olla lisäämässä samannimistä joukkuetta joka on jo listassa
       for (let j of props.kopio) {
         if (j.nimi.trim().toLowerCase() == arvo.trim().toLowerCase()){
           obj.setCustomValidity("Ei samannimisiä");
@@ -247,17 +234,12 @@ console.log(jasenCounter)
     console.log(jasenCounter)
     let uusistate = [...newstate["jasenet"], ""]
     newstate["jasenet"] = uusistate
-   
 
     setjaseninputList([...jaseninputList, `Jäsen ${pituus}`])
 
     
   }
 
-  
-
-
- 
   
   let apuarr = []
   for (let j of newstate["jasenet"]) {
@@ -275,7 +257,6 @@ console.log(jasenCounter)
     for (let i of jaseninputit) {
       i.setCustomValidity("")
     }
-
   }
   jaseninputit = []
 
@@ -296,11 +277,6 @@ console.log(jasenCounter)
 
 }
 
-
-
-
-
-// Tää uusiks!
   const generateId = () => {
 
     const kop = props.kopio;
@@ -331,7 +307,7 @@ console.log(jasenCounter)
       
       
         if ( formistate["nimi"] == ""  || formistate["sarja"] == ""  || formistate["jasenet"] == "" ) {
-            // tänne ei pitäisi päästä
+          
            
             virhe++;
             return false;
@@ -341,9 +317,7 @@ console.log(jasenCounter)
        
         uusijoukkue["id"] = generateId();
         uusijoukkue["sarja"] = {id: sarjaObj[formistate["sarja"]], nimi: formistate["sarja"]};
-        
-       
-        
+
         
    
         let arr = [];
@@ -354,14 +328,9 @@ console.log(jasenCounter)
    
        
         uusijoukkue["jasenet"] = formistate["jasenet"].filter(j => j)
-        uusijoukkue["rastileimaukset"] = ""
+        uusijoukkue["rastileimaukset"] = []
        uusijoukkue["leimaustapa"] = arr
-
-        
-        
-     
-       
-         
+    
     }
     
    
@@ -382,7 +351,6 @@ console.log(jasenCounter)
    
     
   } 
-
 
 
     return (  
@@ -415,7 +383,6 @@ console.log(jasenCounter)
         )
           
             
-          
         
     }
     <p><button type="submit">Tallenna</button></p>
