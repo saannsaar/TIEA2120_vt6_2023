@@ -20,22 +20,22 @@ function App(props) {
   // kopioimista varten on annettu valmis mallifunktio kopioi_kilpailu
   // huom. kaikissa tilanteissa ei kannata kopioida koko dataa
   const [state, setState] = React.useState({ "kilpailu": kopioi_kilpailu(data) });
-  console.log(state.kilpailu);
+  // console.log(state.kilpailu);
   const [kopiostate, setKopioState] = React.useState(state.kilpailu.joukkueet);
   const [showmapState, setshowmapState] = React.useState(false)
-  console.log(state.kilpailu);
-  console.log(kopiostate);
-  console.log(state.kilpailu.sarjat);
-  console.log(Array.from(state.kilpailu));
+  //  console.log(state.kilpailu);
+  // console.log(kopiostate);
+  // console.log(state.kilpailu.sarjat);
+  // console.log(Array.from(state.kilpailu));
 
   const sortedRastit = [...state.kilpailu.rastit].sort((a, b) => a.koodi.localeCompare(b.koodi));
-  console.log(sortedRastit);
+  // console.log(sortedRastit);
   let listausRastit = sortedRastit.map((ele, i) => {
     return { ...ele, naytaInput: false, naytaKartta: false };
   });
   const [rastikopiostate, setRastikopioState] = React.useState(listausRastit);
 
-  console.log(rastikopiostate);
+  // console.log(rastikopiostate);
   const handleInsert = function (uusijoukkue) {
     let kisa = state.kilpailu;
     let joukkueet = Array.from(kisa.joukkueet);
@@ -43,9 +43,9 @@ function App(props) {
     uusijoukkue.key = state.kilpailu.joukkueet.length + 1;
     joukkueet.push(uusijoukkue);
 
-    console.log(state);
+    // console.log(state);
     setKopioState([...kopiostate, uusijoukkue]);
-    console.log(kopiostate);
+    //n console.log(kopiostate);
 
   };
 
@@ -58,7 +58,7 @@ function App(props) {
     setRastikopioState(listausrastit);
   };
   const handleClickmap = function (listausrastit, showmap) {
-    console.log(listausrastit);
+    // console.log(listausrastit);
 
     //TÄSSÄ JOKU MÄTTÄÄ????
     setRastikopioState(listausrastit);
@@ -75,7 +75,7 @@ function App(props) {
       <LisaaJoukkue handleInsert={handleInsert} kopio={kopiostate} setkopio={setKopioState} kilpailu={state.kilpailu} leimaustavat={state.kilpailu.leimaustavat} sarjat={state.kilpailu.sarjat} />
     </div>
     <div className="part">
-      <ListaaJoukkueet joukkueet={kopiostate} />
+      <ListaaJoukkueet joukkueet={kopiostate} rastit={rastikopiostate} />
     </div>
   </div>
     <div id="container2">
@@ -96,30 +96,30 @@ function App(props) {
 const LisaaJoukkue = function(props) {
       
       /* jshint ignore:start */
-      console.log(props.kilpailu.leimaustavat);
-      console.log(props.kopio)
+      // console.log(props.kilpailu.leimaustavat);
+      // console.log(props.kopio)
       let leimaustavat = props.kilpailu.leimaustavat;
       let leimObj = {};
       leimaustavat.forEach((elem, index) => {
         leimObj[elem] = index;
       });
-      console.log(leimObj);
+      // console.log(leimObj);
 
-      console.log(props.kilpailu.sarjat)
+      // console.log(props.kilpailu.sarjat)
       let sarjaObj = {}
       props.kilpailu.sarjat.forEach(elem => {
         sarjaObj[elem.nimi] = elem.id
       })
 
-      console.log(sarjaObj)
+      // console.log(sarjaObj)
 
      
       const [jaseninputList, setjaseninputList] = React.useState(["Jäsen 1", "Jäsen 2"])
       const [jasenCounter, setjasenCounter] = React.useState(2)
       const [leimausstate, setLeimausstate] = React.useState([])
       const [checkstate, setCheckstate] = React.useState([]);
-      console.log(props.leimaustavat[0])
-      console.log(props.sarjat[0].nimi)
+      // console.log(props.leimaustavat[0])
+      // console.log(props.sarjat[0].nimi)
 
       let [formistate, setFormistate] = React.useState({
         nimi : "",
@@ -142,19 +142,19 @@ const LisaaJoukkue = function(props) {
     let checked = obj.checked;
     let validity = obj.validity;
     let newstate = {...formistate}; 
-    console.log(kentta, arvo)
-    console.log(newstate)
+    // console.log(kentta, arvo)
+    // console.log(newstate)
     
     if ( type == "checkbox" ) {
-      console.log(Array.isArray(newstate[kentta]))
-      console.log(newstate[kentta])
-      console.log(formistate[kentta])
-      console.log(formistate[kentta].slice())
+      // console.log(Array.isArray(newstate[kentta]))
+      // console.log(newstate[kentta])
+      // console.log(formistate[kentta])
+      // console.log(formistate[kentta].slice())
       newstate[kentta] = formistate[kentta].slice(0)
       // tehdään kopio, koska alkuperäistä ei voi suoraan käyttää. Huom. tämä slice-temppu ei riitä, jos taulukossa on objekteja. Ei siis tee "deep" kloonia
-      console.log(newstate[kentta])
-      console.log(Array.isArray(newstate[kentta]))
-      console.log(Array.isArray(formistate[kentta]))
+      // console.log(newstate[kentta])
+      // console.log(Array.isArray(newstate[kentta]))
+      // console.log(Array.isArray(formistate[kentta]))
      
      
       if ( checked ) {
@@ -163,8 +163,8 @@ const LisaaJoukkue = function(props) {
           
         
           newstate[kentta] = [...newstate[kentta], arvo]
-          console.log(newstate[kentta])
-          console.log(newstate)
+          // console.log(newstate[kentta])
+          //console.log(newstate)
          
       }
       else {
@@ -198,7 +198,7 @@ const LisaaJoukkue = function(props) {
       }
 
   }  else if (  kentta == "nimi") {
-    console.log("NIMI")
+    // console.log("NIMI")
       for (let j of props.kopio) {
         if (j.nimi.trim().toLowerCase() == arvo.trim().toLowerCase()){
           obj.setCustomValidity("Ei samannimisiä");
@@ -228,10 +228,10 @@ const LisaaJoukkue = function(props) {
     obj.setCustomValidity("Täytä kenttä!!!")
   } else if (luokka == "jasenet"){
     
-    console.log(index)
+    // console.log(index)
     newstate["jasenet"] = formistate["jasenet"].slice(0)
-    console.log(formistate["jasenet"])
-    console.log(newstate["jasenet"].length)
+    // console.log(formistate["jasenet"])
+    // console.log(newstate["jasenet"].length)
     if (index > newstate["jasenet"].length) {
       let uusi = [...newstate["jasenet"]]
      uusi.push(arvo)
@@ -297,14 +297,14 @@ console.log(jasenCounter)
 
   }
   else {
-  console.log(kentta)
-  console.log(newstate[kentta])
+  // console.log(kentta)
+  // console.log(newstate[kentta])
           newstate[kentta] = arvo;
         
 
   }
  setFormistate(newstate);
- console.log(newstate)
+ // console.log(newstate)
 
 }
 
@@ -344,32 +344,31 @@ console.log(jasenCounter)
       
         if ( formistate["nimi"] == ""  || formistate["sarja"] == ""  || formistate["jasenet"] == "" ) {
             // tänne ei pitäisi päästä
-            console.log(i, "virhe");
+           
             virhe++;
             return false;
         }
        
         uusijoukkue["nimi"] = formistate["nimi"];
-        console.log(formistate["nimi"])
+       
         uusijoukkue["id"] = generateId();
         uusijoukkue["sarja"] = {id: sarjaObj[formistate["sarja"]], nimi: formistate["sarja"]};
         
        
         
         
-        console.log(formistate["leimaustapa"])
+   
         let arr = [];
         for (let i of formistate["leimaustapa"]) {
           console.log(i)
          arr.push(leimObj[i])
         }
-        console.log(formistate["jasenet"]);
+   
        
         uusijoukkue["jasenet"] = formistate["jasenet"].filter(j => j)
         uusijoukkue["rastileimaukset"] = ""
        uusijoukkue["leimaustapa"] = arr
-        console.log(uusijoukkue);
-        console.log(props.kopio);
+
         
         
      
@@ -392,7 +391,7 @@ console.log(jasenCounter)
 
     props.handleInsert(uusijoukkue);
     event.target.reset();
-    console.log("kaikki ok!");
+   
     
   } 
 
@@ -452,6 +451,56 @@ const ListaaJoukkueet = function(props) {
         return 0;
       })
       
+      console.log(sortedArr)
+      const sortedwithTimestamps = sortedArr.map(elem => {
+        return {...elem, rastileimaukset: elem.rastileimaukset.sort((a,b) => a.aika.localeCompare(b.aika))}
+      })
+      console.log(sortedwithTimestamps)
+
+      console.log(props.rastit)
+      let rastiObj = {}
+      for (let rasti of props.rastit) {
+        let rLat = rasti.lat
+        let rLon = rasti.lon
+        let koor = []
+        koor.push(rLat)
+        koor.push(rLon)
+        rastiObj[rasti.koodi] = koor
+      }
+      console.log(rastiObj)
+
+      let apuarray = [];
+      for (let j of sortedwithTimestamps) {
+        let leimausArr = []
+        for (let a of j.rastileimaukset) {
+          if (a.rasti == undefined) {
+            continue
+          } else {
+            leimausArr.push(rastiObj[a.rasti.koodi])
+          }
+         
+        }
+        console.log(leimausArr)
+        let matka = 0
+        if (leimausArr.length == 0) {
+          matka = 0
+        }
+        else {
+          for (let k = 0; k < leimausArr.length-1; k++) {
+            matka += getDistanceFromLatLonInKm(leimausArr[k], leimausArr[k+1])
+            matka = Math.round(matka * 10) / 10;
+       
+            
+          }
+        }
+        j.matka = matka 
+       
+
+      }
+
+
+
+      console.log(sortedwithTimestamps)
 
 
       //Loopataan järjestettyjen joukkueiden läpi ja jokaista joukkuetta kohden suoritetaan
@@ -463,10 +512,11 @@ const ListaaJoukkueet = function(props) {
             <th>Sarja</th>
             <th>Joukkue</th>
             <th>Jäsenet</th>
+            <th>Matka</th>
           </tr>
         
-          {Object.keys(sortedArr).map((i) =>
-           <YksittainenJoukkue joukkue={sortedArr[i]} key={i}/>
+          {Object.keys(sortedwithTimestamps).map((i) =>
+           <YksittainenJoukkue joukkue={sortedwithTimestamps[i]} key={i}/>
           )}
         
         </tbody>
@@ -486,6 +536,7 @@ const YksittainenJoukkue = function(props) {
           <JasenListaus jasenet={props.joukkue.jasenet}/>
         </ul>
       </td>
+      <td> {props.joukkue.matka}</td>
     </tr>
   )
 }
@@ -507,7 +558,7 @@ const Rastilistaus = function(props) {
 
 
 
-  console.log(props.showmapState)
+
 
   
   const [mapInstance, setMapInstance] = React.useState(null);
@@ -551,7 +602,7 @@ const Rastilistaus = function(props) {
   }, [mapInstance]);
 
  
-  console.log(props.rastit)
+
 
   
 
@@ -561,12 +612,10 @@ const Rastilistaus = function(props) {
 
 
   const handleChange = function(e) {
-    console.log("MUUTETAAn")
-    console.log(e.target)
-    console.log(muutettava)
+
     let newstate = [...muutettava]
     if (isNaN(e.target.value.charAt(0))) {
-      console.log("KIRJAIN")
+   
 
       e.target.setCustomValidity("Rasti pitää alkaa numerolla")
       e.target.reportValidity()
@@ -583,8 +632,8 @@ const Rastilistaus = function(props) {
 
 
   const handleDoubleClick = function(e) {
-    console.log("DOUBLE CLICK")
-    console.log(e.target.textContent)
+    // console.log("DOUBLE CLICK")
+    // console.log(e.target.textContent)
     let teksti = e.target.textContent.trim()
     let indeksi = teksti.indexOf(" ");
     
@@ -753,6 +802,31 @@ const Elementti = function(props) {
   )
 }
 
+
+function getDistanceFromLatLonInKm(koor1, koor2) {
+
+  let lat1 = koor1[0];
+  let lon1 = koor1[1];
+  let lat2 = koor2[0];
+  let lon2 = koor2[1];
+  let R = 6371; // Radius of the earth in km
+  let dLat = deg2rad(lat2-lat1);  // deg2rad below
+  let dLon = deg2rad(lon2-lon1);
+  let a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ;
+  let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  let d = R * c; // Distance in km
+  return d;
+}
+/**
+   Muuntaa asteet radiaaneiksi
+  */
+function deg2rad(deg) {
+  return deg * (Math.PI/180);
+}
 
 
 const root = ReactDOM.createRoot( document.getElementById('root'));
