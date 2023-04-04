@@ -1,14 +1,5 @@
 "use strict";
 
-
-
-
-
-
-
-
-
-
 /* globals ReactDOM: false */
 /* globals React: false */
 /* globals data: false */
@@ -50,11 +41,11 @@ function App(props) {
   };
 
   const handleDoubleClick = function (listausrastit) {
-    let list = [...listausrastit];
+
     setRastikopioState(listausrastit);
   };
   const handleBlur = function (listausrastit) {
-    let list = [...listausrastit];
+
     setRastikopioState(listausrastit);
   };
   const handleClickmap = function (listausrastit, showmap) {
@@ -62,13 +53,10 @@ function App(props) {
 
     //TÄSSÄ JOKU MÄTTÄÄ????
     setRastikopioState(listausrastit);
-   
-
-
-    
 
   };
  
+
   /* jshint ignore:start */
   return (<div><div id="container1">
     <div className="part">
@@ -86,14 +74,14 @@ function App(props) {
     
     
       </div>
-      
-      
+
     </div>
   </div>);
   /* jshint ignore:end */
 }
 
-const LisaaJoukkue = function(props) {
+// Komponentti joukkueenlisäys formille 
+const LisaaJoukkue = React.memo(function(props) {
       
       /* jshint ignore:start */
       // console.log(props.kilpailu.leimaustavat);
@@ -436,13 +424,15 @@ console.log(jasenCounter)
     </div>
     );
       /* jshint ignore:end */
-};
+})  ;
 
 
 //Komponentti jossa listataan sivulle joukkueet "table"-elementtiin
-const ListaaJoukkueet = function(props) {
+const ListaaJoukkueet = React.memo(function(props) {
       /* jshint ignore:start */
      
+      // Sortataan joukkueet ensisijaisesti sarjan nimen mukaan, ja toissijaisesti
+      // joukkueen nimen mukaan aakkosjärjestykseen
       const sortedArr = [...props.joukkueet].sort(function(a, b) {
         if(a.sarja.nimi.trim().toLowerCase() < b.sarja.nimi.trim().toLowerCase()) return -1;
         if(a.sarja.nimi.trim().toLowerCase() > b.sarja.nimi.trim().toLowerCase()) return 1;
@@ -451,36 +441,48 @@ const ListaaJoukkueet = function(props) {
         return 0;
       })
       
-      console.log(sortedArr)
+      // console.log(sortedArr)
+
+      // Sortataan joukkueiden rastileimaukset oikeaan aikajärjestykseen, jotta kuljettu matka
+      // tulee laskettua oikein
       const sortedwithTimestamps = sortedArr.map(elem => {
         return {...elem, rastileimaukset: elem.rastileimaukset.sort((a,b) => a.aika.localeCompare(b.aika))}
       })
-      console.log(sortedwithTimestamps)
 
+      // console.log(sortedwithTimestamps)
       console.log(props.rastit)
+
+      // Tehdään rastiobjekti joka otetaan "rastikopiostate":sta siksi, että sen tilaa muutetaan
+      //jos rastilistauksesta klikattua koordinaatin sijaintia muutetaan
+      // Näin siis matkan laskemisen päivittäminen on iisimpää kun ei tarvitse uusia koordinaatteja
+      // päivittää myös joukkueen tietoihin kun voidaan vaan rastin id:een perusteella tsekata muuttuneen 
+      // rastikopistate:n koordinaatit
       let rastiObj = {}
+      
       for (let rasti of props.rastit) {
         let rLat = rasti.lat
         let rLon = rasti.lon
         let koor = []
         koor.push(rLat)
         koor.push(rLon)
-        rastiObj[rasti.koodi] = koor
+        rastiObj[rasti.id] = koor
       }
-      console.log(rastiObj)
+      // console.log(rastiObj)
 
       let apuarray = [];
+      // Loopataan joukkueet ja jokaisen joukkueen kohdalla lasketaan matka ja lisätään se 
+      // yhdeksi elementiksi jokaiselle joukkueelle
       for (let j of sortedwithTimestamps) {
         let leimausArr = []
         for (let a of j.rastileimaukset) {
           if (a.rasti == undefined) {
             continue
           } else {
-            leimausArr.push(rastiObj[a.rasti.koodi])
+            leimausArr.push(rastiObj[a.rasti.id])
           }
          
         }
-        console.log(leimausArr)
+      
         let matka = 0
         if (leimausArr.length == 0) {
           matka = 0
@@ -500,7 +502,7 @@ const ListaaJoukkueet = function(props) {
 
 
 
-      console.log(sortedwithTimestamps)
+      // console.log(sortedwithTimestamps)
 
 
       //Loopataan järjestettyjen joukkueiden läpi ja jokaista joukkuetta kohden suoritetaan
@@ -514,7 +516,7 @@ const ListaaJoukkueet = function(props) {
             <th>Jäsenet</th>
             <th>Matka</th>
           </tr>
-        
+
           {Object.keys(sortedwithTimestamps).map((i) =>
            <YksittainenJoukkue joukkue={sortedwithTimestamps[i]} key={i}/>
           )}
@@ -522,10 +524,10 @@ const ListaaJoukkueet = function(props) {
         </tbody>
         </table>);
       /* jshint ignore:end */
-};
+});
 
 // Yksittäisen joukkueen muodostamiseen tarkoitettu komponentti 
-const YksittainenJoukkue = function(props) {
+const YksittainenJoukkue = React.memo(function(props) {
   
   return (
     <tr key={props.joukkue.nimi}>
@@ -539,9 +541,10 @@ const YksittainenJoukkue = function(props) {
       <td> {props.joukkue.matka}</td>
     </tr>
   )
-}
+})
 
-const JasenListaus = function(props) {
+// Komponentti yksittäisen joukkueen jäsenlistauksen muodostamiselle
+const JasenListaus = React.memo(function(props) {
   return (
 <ul>
 {Object.keys(props.jasenet).map((j, index) => 
@@ -552,15 +555,14 @@ const JasenListaus = function(props) {
 </ul>
   )
   
-}
+})
 
-const Rastilistaus = function(props) {
+// Komponentti rastilistaukselle jossa rastin nimeä klikkaamalla voi muokata rastin nimeä, 
+// ja koordinaatteja
+// klikkaamalla aukeaa kartta jossa rastin sijaintia voi raahaamalla muuttaa
+const Rastilistaus = React.memo(function(props) {
 
 
-
-
-
-  
   const [mapInstance, setMapInstance] = React.useState(null);
   const [marker, setMarker] = React.useState(null);
 
@@ -568,11 +570,18 @@ const Rastilistaus = function(props) {
   const tileRef = React.useRef(null);
   const markerRef = React.useRef(null);
 
+  const [muutettava, setMuutettava] = React.useState({
+    koodi: ""
+   })
 
   tileRef.current = L.tileLayer.mml_wmts({ layer: "maastokartta", key : "8c118a1f-99c2-4e8a-8849-54dc255f3205" })
 
+  // Tehdään map tyylille jossa määritellään näytetäänkö kartta
+  // ,oma state jota voidaan muuttaa aina kun käyttäjä klikkaa koordinaattien
+  // nimeä
   const [mapStyles, setMapStules] = React.useState({ visibility: 'hidden'})
 
+  // Alustetaan kartta
   const mapParams = {
     center: [62.148123, 25.647515], 
     crs: L.TileLayer.MML.get3067Proj(),
@@ -580,40 +589,19 @@ const Rastilistaus = function(props) {
     zoomControl: false,
     layers: [tileRef.current], 
   };
+
   React.useEffect(() => {
     mapRef.current = L.map('mapp', mapParams);
-    // Add an event listener:
-    mapRef.current.on('click', () => {
-      console.log('map clicked');
-    });
-    // Set map instance to state:
     setMapInstance(mapRef.current);
   }, []);
 
-  React.useEffect(() => {
-    // Check for the map instance before adding something (ie: another event listener).
-    // If no map, return:
-    if (!mapInstance) return;
-    if (mapInstance) {
-      mapInstance.on('zoomstart', () => {
-        console.log('Zooming!!!');
-      });
-    }
-  }, [mapInstance]);
 
- 
-
-
-  
-
- const [muutettava, setMuutettava] = React.useState({
-  koodi: ""
- })
-
-
+// Rastinimen muutosta käsittelevä funktio
   const handleChange = function(e) {
 
     let newstate = [...muutettava]
+    // tsekataan onko input laatikon arvon ensimmäinen merkki kirjain ja jos on
+    // listään siitä CustomValidity ilmoitus
     if (isNaN(e.target.value.charAt(0))) {
    
 
@@ -644,6 +632,7 @@ const Rastilistaus = function(props) {
       if (elem.koodi.trim().toLowerCase() == teksti.toLowerCase()) {
         console.log(elem)
         setMuutettava({koodi: elem.koodi})
+        // Lisätään klikattavaan rastiin "true" arvo naytaInputille jotta osataan muuttaa se input laatikoksi
        return {...elem, naytaInput: true}
        
       } else {
@@ -656,17 +645,20 @@ const Rastilistaus = function(props) {
     props.handleDoubleClick(uus)
     
   }
+  // Koordinaattien klikkausta käsittelevä funktio jossa muutetaan kartta näkyväksi ja sen sijainti näytöllä
+  // rastin kanssa samalle kohdalle, luodaan marker kartalle koordinaattien perusteella oikeaan kohtaan ja lisätään
+  // drag and drop eventit markerille jotta rastin sijaintia voi muuttaa
   const handleClickmap = function(e) {
     console.log("Nyt lisätään map")
      console.log(e.target)
     
      console.log(e.target.offsetTop)
+     // Määritetään mihin kohtaan kartta siirretään, jotta se olisi klikatun rastin vieressä
      let sijainti = e.target.offsetTop.toString().concat("px")
     
      let naytettava;
 
      let uus = props.rastit.map(elem => {
-     
       if (elem.id == e.target.getAttribute("id")) {
         console.log(elem)
         naytettava = [elem.lat, elem.lon]
@@ -677,6 +669,7 @@ const Rastilistaus = function(props) {
       }})
       console.log(naytettava)
 
+      
       if (marker) {
         marker.removeFrom(mapInstance);
         markerRef.current = null;
@@ -707,6 +700,7 @@ const Rastilistaus = function(props) {
           })
           props.handleClickmap(uus)
         })
+        // Kohdistetaan kartta siihen missä marker on
         mapInstance.setView(naytettava, 8)
         console.log(document.getElementById("mapp"))
         document.getElementById("mapp").style.top = sijainti
@@ -716,10 +710,7 @@ const Rastilistaus = function(props) {
       props.handleClickmap(uus)
   }
  
-  const handleMapBlur = function(e) {
-    console.log("Pois mäppi")
-    console.log(e.target)
-  }
+
 
   // Rastin muokkaus inputista poistumista käsittelevä funktio
   // jossa muokattavan rastin "naytaInput" muutetaan "false", jotta osataan
@@ -756,12 +747,13 @@ setMuutettava(newstate)
     <ul>
       {
       props.rastit.map((rasti, index) => 
-      <Elementti value={rasti.koodi}
+      <Elementti key ={"li_key" + rasti.koodi}
+      value={rasti.koodi}
       handleChange={handleChange}
       handleDoubleClick={handleDoubleClick}
       handleBlur={handleBlur}
       handleClickmap={handleClickmap}
-      handleMapBlur={handleMapBlur}
+   
       id={rasti.id}
       lat={rasti.lat}
       lon={rasti.lon}
@@ -780,27 +772,27 @@ setMuutettava(newstate)
 </div>
   )
 
-}
+})
 
 // Oma komponentti yksittäisen li elementin luomiselle
-const Elementti = function(props) {
+const Elementti = React.memo(function(props) {
   
   return (
-    <li key={props.id}>
+    <li key={"key_" + props.value}>
       {
         // Jos propsina annetun joukkueen "naytaInput" arvo on "true", näytetään text-input laatikkona johon
         //rastin nimi on lisätty arvoksi, jos "naytaInput" arvo on "false", näytetään normaalina tekstielementtinä
         props.naytaInput ? (
           <p><input id={props.id} type="text" value={props.muutettava} onChange={props.handleChange} onBlur={props.handleBlur} autoFocus/> ( {props.lat} {props.lon} )</p>
         ) : (
-          <div><p onDoubleClick={props.handleDoubleClick} > {props.value} </p><p id={props.id}onClick={props.handleClickmap} onBlur={props.handleMapBlur}> ( {props.lat} {props.lon}) </p></div>
+          <div ><p onDoubleClick={props.handleDoubleClick} > {props.value} </p><p key={props.value + "k"} id={props.id}onClick={props.handleClickmap} > ( {props.lat} {props.lon}) </p></div>
          
          
         )
       }
     </li>
   )
-}
+})
 
 
 function getDistanceFromLatLonInKm(koor1, koor2) {
